@@ -36,6 +36,7 @@ export default class MainScreen extends Component {
   }
 
   render() {
+    let healthBarWidth = (Constants.MAX_WIDTH - Constants.XR * 100 - Constants.XR * 60 - Constants.XR * 6) * this.state.health / 100;
     return (
       <View style={styles.container}>
         <Image style={styles.backgroundImage} resizeMode="stretch" source={Images.background} />
@@ -68,8 +69,12 @@ export default class MainScreen extends Component {
                 </TouchableWithoutFeedback>
               </View>
             </View>
-
-            
+            <View style={styles.healthBarContainer}>
+              <View style={styles.healthBar}>
+                <View style={[styles.healthBarInner, { width: healthBarWidth}]} />
+              </View>
+              <Image style={styles.healthIcon} resizeMode="stretch" source={Images.healthIcon} />
+            </View>
           </SafeAreaView>
         </View>
       </View> 
@@ -117,12 +122,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   levelTitle: {
-    fontSize: 21,
+    fontSize: Constants.YR * 25,
     color: 'white',
     fontFamily: Constants.FONT_LITITAONE_REGULAR
   },
   levelNumber: {
-    fontSize: 17,
+    fontSize: Constants.YR * 21,
     color: 'white',
     fontFamily: Constants.FONT_LITITAONE_REGULAR
   },
@@ -143,7 +148,7 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   timeNumber: {
-    fontSize: 17,
+    fontSize: Constants.YR * 22,
     color: 'black',
     fontFamily: Constants.FONT_LITITAONE_REGULAR
   },
@@ -163,6 +168,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center'
   },
+  scoreNumber: {
+    fontSize: Constants.YR * 21,
+    color: 'black',
+    fontFamily: Constants.FONT_LITITAONE_REGULAR
+  },
   pauseButton: {
     width: Constants.YR * 50,
     height: Constants.YR * 50,
@@ -177,5 +187,33 @@ const styles = StyleSheet.create({
   pauseButtonIcon: {
     width: Constants.YR * 25,
     height: Constants.YR * 25
+  },
+  healthBarContainer: {
+    height: Constants.YR * 40,
+    width: Constants.MAX_WIDTH - Constants.XR * 120,
+    marginLeft: Constants.XR * 60,
+  },
+  healthIcon: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: Constants.YR * 40,
+    height: Constants.YR * 40
+  },
+  healthBar: {
+    height: Constants.YR * 20,
+    width: Constants.MAX_WIDTH - Constants.XR * 100 - Constants.XR * 60,
+    marginLeft: Constants.XR * 40,
+    marginTop: Constants.YR * 10,
+    backgroundColor: 'white',
+    borderRadius: Constants.YR * 10
+  },
+  healthBarInner: {
+    position: 'absolute',
+    backgroundColor: '#ff1a1a',
+    left: Constants.XR * 3,
+    top: Constants.XR * 3,
+    bottom: Constants.YR * 3,
+    borderRadius: Constants.YR * 8
   }
 })
