@@ -18,6 +18,8 @@ import {
 import Images from './assets/Images';
 import Constants from './Constants'
 
+import Mole from './Mole';
+
 const DEFAULT_TIME = 5;
 const DEFAULT_STATE = {
   level: 1,
@@ -33,6 +35,7 @@ export default class MainScreen extends Component {
   constructor(props){
     super(props);
     this.state = DEFAULT_STATE;
+    this.moles = [];
   }
 
   render() {
@@ -76,6 +79,26 @@ export default class MainScreen extends Component {
               <Image style={styles.healthIcon} resizeMode="stretch" source={Images.healthIcon} />
             </View>
           </SafeAreaView>
+        </View>
+        <View style={styles.playArea}>
+          {Array.apply(null, Array(4)).map((el, rowIdx) => {
+            return (
+              <View style={styles.playRow} key={rowIdx}>
+                {Array.apply(null, Array(3)).map((el, colIdx) => {
+                  let moleIdx = (rowIdx * 3) + colIdx;
+
+                  return (
+                    <View style={styles.playCell} key={colIdx}>
+                      <Mole
+                        index={moleIdx}
+                        ref={(ref) => { this.moles[moleIdx] = ref }}
+                      />
+                    </View>
+                  )
+                })}
+              </View>
+            )
+          })}
         </View>
       </View> 
     )
@@ -215,5 +238,21 @@ const styles = StyleSheet.create({
     top: Constants.XR * 3,
     bottom: Constants.YR * 3,
     borderRadius: Constants.YR * 8
+  },
+  playArea: {
+    width: Constants.MAX_WIDTH,
+    marginTop: Constants.YR * 250,
+    height: Constants.MAX_HEIGHT - Constants.YR * 250 - Constants.YR * 112,
+    flexDirection: 'column',
+  },
+  playRow: {
+    height: (Constants.MAX_HEIGHT - Constants.YR * 250 - Constants.YR * 112) / 4,
+    width: Constants.MAX_WIDTH,
+    flexDirection: 'row',
+  },
+  playCell: {
+    width: Constants.MAX_WIDTH / 3,
+    height: (Constants.MAX_HEIGHT - Constants.YR * 250 - Constants.YR * 112) / 4,
+    alignItems: 'center'
   }
 })
