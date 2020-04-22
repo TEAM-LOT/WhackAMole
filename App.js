@@ -20,7 +20,7 @@ import Constants from './Constants'
 
 import Mole from './Mole';
 
-const DEFAULT_TIME = 5;
+const DEFAULT_TIME = 20;
 const DEFAULT_STATE = {
   level: 1,
   score: 0,
@@ -36,6 +36,58 @@ export default class MainScreen extends Component {
     super(props);
     this.state = DEFAULT_STATE;
     this.moles = [];
+    this.molesPopping = 0;
+    this.interval = null;
+    this.timeInterval = null;
+  }
+
+  componentDidMount = () => {
+    this.setState(DEFAULT_STATE, this.setupTicks);
+  }
+
+  setupTicks = () => {
+    let speed = 750 - (this.state.level * 50);
+    if (speed < 350) {
+      speed = 350;
+    }
+    this.interval = setInterval(this.popRanndomMole, speed);
+    this.timeInterval = setInterval(this.timerTick, 1000);
+  }
+
+  randomBetween = (min, max) => {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+  }
+
+  onFinishPopping = (index) => {
+    this.molesPopping -= 1;
+  }
+
+  popRanndomMole = () => {
+    if (this.moles.length != 12) {
+      return;
+    }
+    
+    let randomIndex = this.randomBetween(0, 11);
+    if (!this.moles[randomIndex].isPopping && this.molesPopping < 3) {
+      this.molesPopping += 1;
+      this.moles[randomIndex].pop();
+    }
+  }
+
+  timerTick = () => {
+    if (this.state.time === 0) {
+      clearInterval(this.interval);
+      clearInterval(this.timeInterval);
+      this.setState({
+        cleared: true
+      })
+    }
+    else {
+      this.setState({
+        time: this.state.time - 1
+      })
+    }
+     
   }
 
   render() {
@@ -81,10 +133,13 @@ export default class MainScreen extends Component {
           </SafeAreaView>
         </View>
         <View style={styles.playArea}>
-          {Array.apply(null, Array(4)).map((el, rowIdx) => {
+          
+          {//縦に4段
+          Array.apply(null, Array(4)).map((el, rowIdx) => {
             return (
               <View style={styles.playRow} key={rowIdx}>
-                {Array.apply(null, Array(3)).map((el, colIdx) => {
+                {//横に3列
+                Array.apply(null, Array(3)).map((el, colIdx) => {
                   let moleIdx = (rowIdx * 3) + colIdx;
 
                   return (
@@ -92,6 +147,7 @@ export default class MainScreen extends Component {
                       <Mole
                         index={moleIdx}
                         ref={(ref) => { this.moles[moleIdx] = ref }}
+                        onFinishPopping={this.onFinishPopping}
                       />
                     </View>
                   )

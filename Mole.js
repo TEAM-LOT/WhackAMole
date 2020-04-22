@@ -17,6 +17,26 @@ export default class Mole extends Component {
     this.mole = null;
   }
 
+  pop = () => {
+    this.isPopping = true;
+    this.mole.play({
+      type: "appear",
+      fps: 24,
+      onFinish: () => {
+        this.actionTimeout = setTimeout(() => {
+          this.mole.play({
+            type: "hide",
+            fps: 24,
+            onFinish: () => {
+              this.isPopping= false;
+              this.props.onFinishPopping(this.props.index);
+            }
+          })
+        }, 1000);
+      }
+    })
+  }
+
   whack = () => {
 
   }
@@ -32,6 +52,7 @@ export default class Mole extends Component {
           width={100}
           animations={{
             idle: [0],
+            appear: [1, 2, 3, 4],
             hide: [4, 3, 2, 1, 0],
             dizzy: [36, 37, 38],
             faint: [42, 43, 44, 0],
