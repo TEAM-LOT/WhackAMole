@@ -1,11 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-
 import React, { Component } from "react";
 import { 
     View,
@@ -14,13 +6,17 @@ import {
     StyleSheet,
     SafeAreaView,
     TouchableWithoutFeedback,
+    Button,
 } from "react-native";
 import Images from './assets/Images';
 import Constants from './Constants'
-
 import Mole from './Mole';
+import SpriteSheet from 'rn-sprite-sheet';
+import GameOver from './GameOver';
+import Clear from './Clear';
+import Pause from './Pause';
 
-const DEFAULT_TIME = 20;
+const DEFAULT_TIME = 5;
 const DEFAULT_STATE = {
   level: 1,
   score: 0,
@@ -41,18 +37,59 @@ export default class MainScreen extends Component {
     this.timeInterval = null;
   }
 
+  /**
+   * 画面描画完了直後に呼ばれるライフサイクル関数
+   * @return void
+   */
   componentDidMount = () => {
     this.setState(DEFAULT_STATE, this.setupTicks);
   }
 
   setupTicks = () => {
-    let speed = 750 - (this.state.level * 50);
+    let speed = 750 - (this.state.level * 50);    //レベル1で0.7秒間隔で更新
     if (speed < 350) {
       speed = 350;
     }
     this.interval = setInterval(this.popRanndomMole, speed);
     this.timeInterval = setInterval(this.timerTick, 1000);
   }
+
+  reset = () => {
+    this.molesPopping = 0;
+
+    this.setState(DEFAULT_STATE, this.setupTicks);
+  }
+
+  pause = () => {
+    console.log('pause1');
+    if (this.interval) clearInterval(this.interval);
+    if (this.timeInterval) clearInterval(this.timeInterval);
+    
+    console.log('pause2');
+
+    this.setState({
+      paused: true
+    });
+  }
+
+  resume = () => {
+    this.molesPopping = 0;
+    this.setState({
+      paused: false
+    }, this.setupTicks);
+  }
+
+  nextLevel = () => {
+    this.molesPopping = 0;
+
+    this.setState({
+      level: this.state.level + 1,
+      cleared: false,
+      gameover: false,
+      time: DEFAULT_TIME
+    }, this.setupTicks)
+  }
+  
 
   randomBetween = (min, max) => {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -64,6 +101,7 @@ export default class MainScreen extends Component {
 
   popRanndomMole = () => {
     if (this.moles.length != 12) {
+      console.log('moles.length'+this.moles.length);
       return;
     }
     
@@ -86,8 +124,45 @@ export default class MainScreen extends Component {
       this.setState({
         time: this.state.time - 1
       })
+    } 
+  }
+
+  onScore = () => {
+    this.setState({
+      score: this.state.score + 1
+    })
+  }
+
+  onDamage = () => {
+    if(this.state.cleared || this.state.gameOver || this.state.paused) {
+      return;
     }
-     
+
+    let targetHealth = this.state.health - 10 < 0 ? 0 : this.state.health - 10;
+
+    this.setState({
+      health: targetHealth
+    });
+
+    if (targetHealth <= 0) {
+      this.gameOver();
+    }
+  }
+
+  gameOver = () => {
+    clearInterval(this.interval);
+    clearInterval(this.timeInterval);
+
+    this.setState({
+      gameover: true
+    });
+  }
+
+  onHeal = () => {
+    let targetHealth = this.state.health + 10 > 100 ? 100 : this.state.health + 10;
+    this.setState({
+      health: targetHealth
+    });
   }
 
   render() {
@@ -148,6 +223,9 @@ export default class MainScreen extends Component {
                         index={moleIdx}
                         ref={(ref) => { this.moles[moleIdx] = ref }}
                         onFinishPopping={this.onFinishPopping}
+                        onDamage={this.onDamage}
+                        onHeal={this.onHeal}
+                        onScore={this.onScore}
                       />
                     </View>
                   )
@@ -156,6 +234,9 @@ export default class MainScreen extends Component {
             )
           })}
         </View>
+        {this.state.cleared && <Clear onReset={this.reset} onNextLevel={this.nextLevel} level={this.state.level} score={this.state.score} />}
+        {this.state.gameover && <GameOver onReset={this.reset} level={this.state.level} score={this.state.score} />}
+        {this.state.paused && <Pause onReset={this.reset} onResume={this.resume} />}
       </View> 
     )
   }
